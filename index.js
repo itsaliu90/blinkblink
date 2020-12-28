@@ -1,3 +1,5 @@
+let timestamps = []
+
 function distance(a, b) {
   return Math.sqrt(Math.pow(a[0] - b[0], 2) + Math.pow(a[1] - b[1], 2));
 }
@@ -36,11 +38,16 @@ async function renderPrediction() {
     // calculate the "close" event
 
     if (distance(predictions[0].scaledMesh[159], predictions[0].scaledMesh[145]) < 8) {
-      console.log("blinked");
+      
+      if ((timestamps.length == 0) || (Date.now() - timestamps[timestamps.length-1]) > 500) {
+        timestamps.push(Date.now())
+        console.log(timestamps)
 
-      var circle = d3.select("circle");
-      var radius = circle.attr("r");
-      circle.attr("r", parseInt(radius) + 5);
+        var circle = d3.select("circle");
+        var radius = circle.attr("r");
+        circle.attr("r", parseInt(radius) + 5);
+
+      }
     }
 
     // for (let i = 0; i < predictions.length; i++) {
