@@ -1,7 +1,43 @@
 let timestamps = []
+let aggregatedTimestamps = []
+let ping = new sound("ping.mp3")
+
+function sound(src) {
+  this.sound = document.createElement("audio");
+  this.sound.src = src;
+  this.sound.setAttribute("preload", "auto");
+  this.sound.setAttribute("controls", "none");
+  this.sound.style.display = "none";
+  document.body.appendChild(this.sound);
+  this.play = function(){
+    this.sound.play();
+  }
+  this.stop = function(){
+    this.sound.pause();
+  }
+}
 
 function distance(a, b) {
   return Math.sqrt(Math.pow(a[0] - b[0], 2) + Math.pow(a[1] - b[1], 2));
+}
+
+function callEveryMinute() {
+    drawChart()
+    setInterval(drawChart, 1000 * 60);
+}
+
+function drawChart() {
+  console.log("minute repeat")
+  groupTimestamps()
+  // Do things in D3
+}
+
+function groupTimestamps() {
+  var oneMinuteAgo = new Date();
+  oneMinuteAgo.setMinutes(oneMinuteAgo.getMinutes() - 1);
+  var result = timestamps.filter(timestamp => timestamp > oneMinuteAgo)
+  aggregatedTimestamps.push({"count" : result.length, "time" : oneMinuteAgo})
+  console.log(aggregatedTimestamps)
 }
 
 async function setupCamera() {
@@ -37,15 +73,17 @@ async function renderPrediction() {
     // for points 145 and 159 in the scaled model,
     // calculate the "close" event
 
-    if (distance(predictions[0].scaledMesh[159], predictions[0].scaledMesh[145]) < 8) {
+    if (distance(predictions[0].scaledMesh[159], predictions[0].scaledMesh[145]) < 8 &&
+        distance(predictions[0].scaledMesh[386], predictions[0].scaledMesh[374]) < 8) {
       
       if ((timestamps.length == 0) || (Date.now() - timestamps[timestamps.length-1]) > 500) {
         timestamps.push(Date.now())
         console.log(timestamps)
 
+        ping.play()
         var circle = d3.select("circle");
         var radius = circle.attr("r");
-        circle.attr("r", parseInt(radius) + 5);
+        circle.attr("r", parseInt(radius) + 2);
 
       }
     }
@@ -74,6 +112,17 @@ async function main() {
     {maxFaces: 1});
   console.log("model configured - ready to detect")
   renderPrediction();
+  var nextDate = new Date();
+  if (nextDate.getSeconds() === 0) { // You can check for seconds here too
+      callEveryMinute()
+  } else {
+      nextDate.setMinutes(nextDate.getMinutes() + 1);
+      nextDate.setSeconds(0);// I wouldn't do milliseconds too ;)
+
+      var difference = nextDate - new Date();
+      console.log(difference)
+      setTimeout(callEveryMinute, difference);
+  }
 };
 
 main();
