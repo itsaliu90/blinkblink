@@ -9,9 +9,15 @@
 
   <!-- Require face-landmarks-detection itself. -->
   <script src="https://unpkg.com/@tensorflow-models/face-landmarks-detection@0.0.1/dist/face-landmarks-detection.js"></script>
+
+  <!-- Add D3 -->
+  <script src="https://d3js.org/d3.v6.min.js"></script>
 </head>
 <body>
   <div id="main">
+    <svg height="400" width="400">
+      <circle class="circle" cx="200" cy="200" r="10" stroke-width="3" fill="green" />
+    </svg>
     <div class="container">
       <div class="canvas-wrapper">
         <canvas id="output"></canvas>
