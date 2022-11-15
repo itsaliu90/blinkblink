@@ -1,5 +1,6 @@
 let timestamps = []
 let aggregatedTimestamps = []
+let ping = new sound("ping.mp3")
 
 var margin = {top: 40, right: 20, bottom: 30, left: 40},
     width = 960 - margin.left - margin.right,
@@ -27,6 +28,21 @@ var svg = d3.select("#my_dataviz").append("svg")
 
 // Functions
 
+function sound(src) {
+  this.sound = document.createElement("audio");
+  this.sound.src = src;
+  this.sound.setAttribute("preload", "auto");
+  this.sound.setAttribute("controls", "none");
+  this.sound.style.display = "none";
+  document.body.appendChild(this.sound);
+  this.play = function(){
+    this.sound.play();
+  }
+  this.stop = function(){
+    this.sound.pause();
+  }
+}
+
 function distance(a, b) {
   return Math.sqrt(Math.pow(a[0] - b[0], 2) + Math.pow(a[1] - b[1], 2));
 }
@@ -34,6 +50,11 @@ function distance(a, b) {
 function callEverySecond() {
     drawChart()
     setInterval(drawChart, 1000);
+}
+
+function callEveryMinute() {
+    drawChart()
+    setInterval(drawChart, 1000 * 60);
 }
 
 function drawChart() {
@@ -73,19 +94,11 @@ function drawChart() {
   }
 }
 
-// function groupTimestamps() {
-//   var oneMinuteAgo = new Date();
-//   oneMinuteAgo.setMinutes(oneMinuteAgo.getMinutes() - 1);
-//   var result = timestamps.filter(timestamp => timestamp > oneMinuteAgo)
-//   aggregatedTimestamps.push({"count" : result.length, "time" : oneMinuteAgo})
-//   console.log(aggregatedTimestamps)
-// }
-
 function groupTimestamps() {
-  var oneSecondAgo = new Date();
-  oneSecondAgo.setSeconds(oneSecondAgo.getSeconds() - 1);
-  var result = timestamps.filter(timestamp => timestamp > oneSecondAgo)
-  aggregatedTimestamps.push({"count" : result.length, "time" : oneSecondAgo})
+  var oneMinuteAgo = new Date();
+  oneMinuteAgo.setMinutes(oneMinuteAgo.getMinutes() - 1);
+  var result = timestamps.filter(timestamp => timestamp > oneMinuteAgo)
+  aggregatedTimestamps.push({"count" : result.length, "time" : oneMinuteAgo})
   console.log(aggregatedTimestamps)
 }
 
@@ -128,19 +141,10 @@ async function renderPrediction() {
       if ((timestamps.length == 0) || (Date.now() - timestamps[timestamps.length-1]) > 500) {
         timestamps.push(Date.now())
         console.log(timestamps)
+
+        ping.play()
       }
     }
-
-    // for (let i = 0; i < predictions.length; i++) {
-    //   const keypoints = predictions[i].scaledMesh;
-
-    //   // Log facial keypoints.
-    //   for (let i = 0; i < keypoints.length; i++) {
-    //     const [x, y, z] = keypoints[i];
-
-    //     console.log(`Keypoint ${i}: [${x}, ${y}, ${z}]`);
-    //   }
-    // }
   }
 
   rafID = requestAnimationFrame(renderPrediction);
@@ -157,13 +161,14 @@ async function main() {
   renderPrediction();
   var nextDate = new Date();
   if (nextDate.getSeconds() === 0) { // You can check for seconds here too
-      callEverySecond()
+      callEveryMinute()
   } else {
-      nextDate.setSeconds(nextDate.getSeconds() + 1);
+      nextDate.setMinutes(nextDate.getMinutes() + 1);
+      nextDate.setSeconds(0);// I wouldn't do milliseconds too ;)
 
       var difference = nextDate - new Date();
       console.log(difference)
-      setTimeout(callEverySecond, difference);
+      setTimeout(callEveryMinute, difference);
   }
 };
 

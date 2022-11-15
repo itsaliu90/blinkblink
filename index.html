@@ -70,15 +70,12 @@
 </head>
 <body>
   <h1>Blink Counter</h1>
-  <p1>This app uses tensorflow to count your blinks over time. Enable your webcam and try it out!</p1>
+  <p1>This app uses tensorflow to count your blinks over time and plays a sound each time you blink. Enable your webcam and speakers to try it out! Note: the app takes ~10 seconds to initialize.</p1>
   <div id="main">
+    <h2>Camera with detector</h2>
+    <video id="video"></video>
+    <h2>Blink counter over time (minute resolution - will take 60 seconds to load)</h2>
     <div id="my_dataviz"></div>
-    <div class="container">
-      <div class="canvas-wrapper">
-        <canvas id="output"></canvas>
-        <video id="video"></video>
-      </div>
-    </div>
   </div>
 </body>
 <script src="index.js"></script>
