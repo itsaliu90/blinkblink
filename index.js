@@ -1,10 +1,9 @@
 let timestamps = []
 let aggregatedTimestamps = []
-let ping = new sound("ping.mp3")
 
 var margin = {top: 40, right: 20, bottom: 30, left: 40},
     width = 960 - margin.left - margin.right,
-    height = 500 - margin.top - margin.bottom;
+    height = 200 - margin.top - margin.bottom;
 
 var x = d3.scale.ordinal()
     .rangeRoundBands([0, width], .1);
@@ -20,7 +19,7 @@ var yAxis = d3.svg.axis()
     .scale(y)
     .orient("left")
 
-var svg = d3.select("body").append("svg")
+var svg = d3.select("#my_dataviz").append("svg")
     .attr("width", width + margin.left + margin.right)
     .attr("height", height + margin.top + margin.bottom)
   .append("g")
@@ -28,28 +27,13 @@ var svg = d3.select("body").append("svg")
 
 // Functions
 
-function sound(src) {
-  this.sound = document.createElement("audio");
-  this.sound.src = src;
-  this.sound.setAttribute("preload", "auto");
-  this.sound.setAttribute("controls", "none");
-  this.sound.style.display = "none";
-  document.body.appendChild(this.sound);
-  this.play = function(){
-    this.sound.play();
-  }
-  this.stop = function(){
-    this.sound.pause();
-  }
-}
-
 function distance(a, b) {
   return Math.sqrt(Math.pow(a[0] - b[0], 2) + Math.pow(a[1] - b[1], 2));
 }
 
-function callEveryMinute() {
+function callEverySecond() {
     drawChart()
-    setInterval(drawChart, 1000 * 60);
+    setInterval(drawChart, 1000);
 }
 
 function drawChart() {
@@ -89,11 +73,19 @@ function drawChart() {
   }
 }
 
+// function groupTimestamps() {
+//   var oneMinuteAgo = new Date();
+//   oneMinuteAgo.setMinutes(oneMinuteAgo.getMinutes() - 1);
+//   var result = timestamps.filter(timestamp => timestamp > oneMinuteAgo)
+//   aggregatedTimestamps.push({"count" : result.length, "time" : oneMinuteAgo})
+//   console.log(aggregatedTimestamps)
+// }
+
 function groupTimestamps() {
-  var oneMinuteAgo = new Date();
-  oneMinuteAgo.setMinutes(oneMinuteAgo.getMinutes() - 1);
-  var result = timestamps.filter(timestamp => timestamp > oneMinuteAgo)
-  aggregatedTimestamps.push({"count" : result.length, "time" : oneMinuteAgo})
+  var oneSecondAgo = new Date();
+  oneSecondAgo.setSeconds(oneSecondAgo.getSeconds() - 1);
+  var result = timestamps.filter(timestamp => timestamp > oneSecondAgo)
+  aggregatedTimestamps.push({"count" : result.length, "time" : oneSecondAgo})
   console.log(aggregatedTimestamps)
 }
 
@@ -136,12 +128,6 @@ async function renderPrediction() {
       if ((timestamps.length == 0) || (Date.now() - timestamps[timestamps.length-1]) > 500) {
         timestamps.push(Date.now())
         console.log(timestamps)
-
-        ping.play()
-        var circle = d3.select("circle");
-        var radius = circle.attr("r");
-        circle.attr("r", parseInt(radius) + 2);
-
       }
     }
 
@@ -171,14 +157,13 @@ async function main() {
   renderPrediction();
   var nextDate = new Date();
   if (nextDate.getSeconds() === 0) { // You can check for seconds here too
-      callEveryMinute()
+      callEverySecond()
   } else {
-      nextDate.setMinutes(nextDate.getMinutes() + 1);
-      nextDate.setSeconds(0);// I wouldn't do milliseconds too ;)
+      nextDate.setSeconds(nextDate.getSeconds() + 1);
 
       var difference = nextDate - new Date();
       console.log(difference)
-      setTimeout(callEveryMinute, difference);
+      setTimeout(callEverySecond, difference);
   }
 };
 
